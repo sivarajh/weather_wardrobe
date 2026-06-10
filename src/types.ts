@@ -21,6 +21,7 @@ export interface Preferences {
 export type TempBand = "freezing" | "cold" | "cool" | "mild" | "warm" | "hot";
 
 export interface WeatherSnapshot {
+  observedAt: string;
   temperatureC: number;
   feelsLikeC: number;
   windKph: number;

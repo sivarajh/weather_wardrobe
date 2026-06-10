@@ -60,16 +60,53 @@ export async function getCurrentPlace(): Promise<LocatedPlace> {
     }));
   const { latitude, longitude } = position.coords;
 
-  let label = "your area";
+  let label = "";
   try {
     const [place] = await Location.reverseGeocodeAsync({ latitude, longitude });
     if (place) {
-      label = place.city ?? place.subregion ?? place.region ?? label;
+      label = place.city ?? place.subregion ?? place.region ?? "";
     }
   } catch {
-    // reverse geocoding is best-effort; weather still works with coordinates
+    // native reverse geocoding is unavailable on web; fall through
   }
-  return { latitude, longitude, label };
+  if (!label) {
+    label = await reverseGeocodeFallback(latitude, longitude);
+  }
+  return { latitude, longitude, label: label || "your area" };
+}
+
+// Works on every platform including web (CORS-enabled, no API key).
+async function reverseGeocodeFallback(
+  latitude: number,
+  longitude: number
+): Promise<string> {
+  try {
+    const response = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+    );
+    if (!response.ok) return "";
+    const data = await response.json();
+    return (
+      data.locality ||
+      data.city ||
+      data.principalSubdivision ||
+      data.countryName ||
+      ""
+    );
+  } catch {
+    return "";
+  }
+}
+
+// Open-Meteo returns the observation time as a local ISO string (timezone=auto),
+// e.g. "2026-06-09T20:30" — format the clock part as 12-hour time.
+function formatLocalTime(isoLocal: string): string {
+  const clock = isoLocal?.split("T")[1];
+  if (!clock) return "";
+  const [hourStr, minuteStr] = clock.split(":");
+  const hour = Number(hourStr);
+  const h12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${h12}:${minuteStr} ${hour < 12 ? "AM" : "PM"}`;
 }
 
 export async function fetchWeather(
@@ -97,6 +134,7 @@ export async function fetchWeather(
   const feelsLike: number = current.apparent_temperature;
 
   return {
+    observedAt: formatLocalTime(current.time),
     temperatureC: current.temperature_2m,
     feelsLikeC: feelsLike,
     windKph: current.wind_speed_10m,

@@ -104,6 +104,9 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
             💨 {Math.round(weather.windKph)} km/h · ☔{" "}
             {weather.precipitationProbability}% rain
           </Text>
+          {weather.observedAt !== "" && (
+            <Text style={styles.metaText}>As of {weather.observedAt}</Text>
+          )}
         </View>
       </View>
 

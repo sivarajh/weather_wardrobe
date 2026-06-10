@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Linking,
   RefreshControl,
   ScrollView,
@@ -10,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { OutfitRecommendation, Preferences, WeatherSnapshot } from "../types";
 import { fetchWeather, getCurrentPlace } from "../weather";
 import { recommendOutfit } from "../outfits";
@@ -118,7 +118,13 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
             style={styles.imageRow}
           >
             {imageUrls.map((url) => (
-              <Image key={url} source={{ uri: url }} style={styles.image} />
+              <Image
+                key={url}
+                source={{ uri: url }}
+                style={styles.image}
+                contentFit="cover"
+                transition={200}
+              />
             ))}
           </ScrollView>
           <Text style={styles.imageCaption}>

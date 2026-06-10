@@ -5,6 +5,12 @@ to wear based on your **current location and weather**, personalized by
 **gender, style choice, and modesty preference** — with sample outfit images
 and links to find each look at the best and cheapest price.
 
+## Screenshots
+
+| Onboarding | Home |
+| :---: | :---: |
+| <img src="screenshots/onboarding.png" width="280" alt="Onboarding: gender, style, modesty and notification time choices" /> | <img src="screenshots/home.png" width="280" alt="Home: local weather, outfit recommendation, sample looks and shopping links" /> |
+
 ## Features
 
 - **Onboarding profile** — pick who you shop for (women / men / non-binary),

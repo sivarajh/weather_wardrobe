@@ -43,10 +43,16 @@ export async function fetchOutfitImages(
     return results
       .map((r, index) => ({ r, index, score: subjectScore(r, lowerQuery) }))
       .sort((a, b) => b.score - a.score || a.index - b.index)
-      .map(({ r }) => r.urls?.regular ?? r.urls?.small)
+      .map(({ r }) => r.urls?.small ?? r.urls?.regular)
       .filter((url): url is string => Boolean(url))
       .slice(0, count)
-      .map((url) => `${url.split("?")[0]}?w=600&q=80&fit=crop`);
+      // Unsplash's image CDN (imgix) fails to load inside the iOS simulator
+      // ("cannot parse response"), so serve via the wsrv.nl proxy, which
+      // re-encodes to plain JPEG on a different CDN.
+      .map(
+        (url) =>
+          `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=600&h=750&fit=cover&output=jpg`
+      );
   } catch {
     return [];
   }

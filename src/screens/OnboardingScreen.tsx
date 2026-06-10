@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Gender, Modesty, Preferences, StyleChoice } from "../types";
 import { DEFAULT_PREFS } from "../storage";
-import { colors, fonts, radius } from "../theme";
+import { colors, fonts, radius, shadow } from "../theme";
 
 const GENDERS: { value: Gender; label: string }[] = [
   { value: "female", label: "Women" },
@@ -157,7 +157,7 @@ export default function OnboardingScreen({ initial, onDone }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.paper },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 24, paddingTop: 72, paddingBottom: 48 },
   heading: {
     fontSize: 34,
@@ -169,14 +169,14 @@ const styles = StyleSheet.create({
   sub: {
     fontSize: 15,
     fontFamily: fonts.body,
-    color: colors.ink,
+    color: colors.gray,
     marginTop: 12,
     lineHeight: 23,
   },
   section: {
     fontSize: 12,
     fontFamily: fonts.mono,
-    color: colors.ink,
+    color: colors.gray,
     textTransform: "uppercase",
     letterSpacing: 1.5,
     marginTop: 32,
@@ -185,26 +185,29 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: {
     paddingHorizontal: 18,
-    paddingVertical: 10,
+    paddingVertical: 11,
     borderRadius: radius.pill,
     backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: colors.ink,
+    borderColor: colors.border,
   },
-  chipSelected: { backgroundColor: colors.lime, borderColor: colors.ink },
+  chipSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
   chipText: {
     fontSize: 14,
     color: colors.ink,
     fontFamily: fonts.bodySemiBold,
   },
-  chipTextSelected: { color: colors.ink },
+  chipTextSelected: { color: colors.paper },
   modestyCard: {
     backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: colors.ink,
-    borderRadius: radius.sm,
-    padding: 14,
-    marginBottom: 8,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: 16,
+    marginBottom: 10,
   },
   hint: {
     fontSize: 13,
@@ -214,15 +217,14 @@ const styles = StyleSheet.create({
   },
   cta: {
     marginTop: 36,
-    backgroundColor: colors.lime,
-    borderRadius: radius.sm,
-    paddingVertical: 16,
+    backgroundColor: colors.primary,
+    borderRadius: radius.pill,
+    paddingVertical: 17,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.ink,
+    ...shadow,
   },
   ctaText: {
-    color: colors.ink,
+    color: colors.paper,
     fontSize: 15,
     fontFamily: fonts.bodyBold,
     letterSpacing: 0.3,

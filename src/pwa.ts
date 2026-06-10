@@ -20,7 +20,7 @@ export function registerPWA(): void {
   if (!head.querySelector('meta[name="theme-color"]')) {
     const theme = document.createElement("meta");
     theme.name = "theme-color";
-    theme.content = "#C8FF00";
+    theme.content = "#B79CED";
     head.appendChild(theme);
   }
 

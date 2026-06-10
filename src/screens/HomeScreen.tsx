@@ -10,11 +10,12 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { OutfitRecommendation, Preferences, WeatherSnapshot } from "../types";
 import { fetchWeather, getCurrentPlace } from "../weather";
 import { recommendOutfit } from "../outfits";
 import { fetchOutfitImages } from "../images";
-import { colors, fonts, radius } from "../theme";
+import { colors, fonts, gradient, radius, shadow } from "../theme";
 
 interface Props {
   prefs: Preferences;
@@ -95,7 +96,12 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.weatherCard}>
+      <LinearGradient
+        colors={gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.weatherCard}
+      >
         <Text style={styles.temp}>{Math.round(weather.temperatureC)}°C</Text>
         <View style={styles.weatherMeta}>
           <Text style={styles.metaText}>
@@ -109,7 +115,7 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
             <Text style={styles.metaText}>As of {weather.observedAt}</Text>
           )}
         </View>
-      </View>
+      </LinearGradient>
 
       <Text style={styles.outfitTitle}>{outfit.title}</Text>
       <Text style={styles.summary}>{outfit.summary}</Text>
@@ -171,13 +177,13 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.paper },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 24, paddingTop: 64, paddingBottom: 48 },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.paper,
+    backgroundColor: colors.background,
     padding: 24,
   },
   loadingText: {
@@ -211,39 +217,35 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   settingsBtn: {
-    backgroundColor: colors.lime,
+    backgroundColor: colors.primaryFaint,
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.ink,
   },
   settingsText: {
-    color: colors.ink,
+    color: colors.primary,
     fontFamily: fonts.bodySemiBold,
     fontSize: 13,
   },
   weatherCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.lavender,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.ink,
-    padding: 20,
+    borderRadius: radius.lg,
+    padding: 22,
     marginTop: 20,
+    ...shadow,
   },
   temp: {
     fontSize: 48,
     fontFamily: fonts.serif,
     fontWeight: "400",
-    color: colors.ink,
+    color: colors.paper,
   },
   weatherMeta: { marginLeft: 18 },
   metaText: {
-    color: colors.ink,
+    color: colors.paper,
     fontSize: 13,
-    fontFamily: fonts.body,
+    fontFamily: fonts.bodySemiBold,
     marginVertical: 1,
   },
   outfitTitle: {
@@ -264,9 +266,9 @@ const styles = StyleSheet.create({
   image: {
     width: 180,
     height: 225,
-    borderRadius: radius.sm,
+    borderRadius: radius.lg,
     marginRight: 10,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.primaryFaint,
   },
   imageCaption: {
     fontSize: 11,
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
   section: {
     fontSize: 12,
     fontFamily: fonts.mono,
-    color: colors.ink,
+    color: colors.gray,
     textTransform: "uppercase",
     letterSpacing: 1.5,
     marginTop: 30,
@@ -292,16 +294,15 @@ const styles = StyleSheet.create({
   },
   shopCard: {
     backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.ink,
-    borderRadius: radius.sm,
-    padding: 14,
-    marginBottom: 8,
+    borderRadius: radius.lg,
+    padding: 16,
+    marginBottom: 10,
+    ...shadow,
   },
   shopLabel: {
     fontSize: 15,
     fontFamily: fonts.bodySemiBold,
-    color: colors.ink,
+    color: colors.primary,
   },
   shopNote: {
     fontSize: 13,
@@ -310,12 +311,11 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   cta: {
-    backgroundColor: colors.lime,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.ink,
+    backgroundColor: colors.primary,
+    borderRadius: radius.pill,
     paddingVertical: 14,
     paddingHorizontal: 28,
+    ...shadow,
   },
-  ctaText: { color: colors.ink, fontSize: 15, fontFamily: fonts.bodyBold },
+  ctaText: { color: colors.paper, fontSize: 15, fontFamily: fonts.bodyBold },
 });

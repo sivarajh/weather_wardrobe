@@ -1,24 +1,39 @@
-import { Platform } from "react-native";
+import { Platform, ViewStyle } from "react-native";
 
-// Design language modeled on whering.co.uk: near-black ink on white,
-// signature lime + lavender accents, serif display headlines (IvyMode on
-// their site — closest licensed-free stand-in is the platform serif),
-// Manrope body text, monospace uppercase section labels, small radii.
+// "Silk" evolution of the Whering-inspired language: lavender is now the
+// primary, paired with blush pink in gradients. Hard ink outlines are
+// replaced with soft shadows, hairline borders, and generous radii.
 export const colors = {
-  ink: "#242424",
+  ink: "#2B2435",
   paper: "#FFFFFF",
-  offWhite: "#F5F5F5",
-  lime: "#C8FF00",
-  lavender: "#CEB4FE",
+  background: "#FAF8FD",
+  primary: "#B79CED",
+  primarySoft: "#CEB4FE",
+  primaryFaint: "#F1EBFC",
   pink: "#FF95B8",
-  border: "#E3E3E3",
-  gray: "#6C757D",
+  border: "#EDE7F8",
+  gray: "#8B8398",
 };
+
+// Blush-to-lavender, lifted from Whering's section gradient.
+export const gradient = ["#FF95B8", "#CEB4FE"] as const;
 
 export const radius = {
-  sm: 5,
+  sm: 14,
+  lg: 22,
   pill: 100,
 };
+
+export const shadow: ViewStyle = Platform.select({
+  web: { boxShadow: "0 10px 30px rgba(99, 70, 160, 0.12)" } as ViewStyle,
+  default: {
+    shadowColor: "#6346A0",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.14,
+    shadowRadius: 18,
+    elevation: 5,
+  },
+}) as ViewStyle;
 
 export const fonts = {
   serif: Platform.select({

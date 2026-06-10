@@ -29,6 +29,9 @@ and links to find each look at the best and cheapest price.
   outfit and temperature in the message. A background task periodically
   re-fetches weather and refreshes the notification content.
 
+**Live web version:** https://sivarajh.github.io/weather_wardrobe/ —
+installable as a PWA, auto-deployed from `main` by GitHub Actions.
+
 ## Run it
 
 ```bash
@@ -95,6 +98,42 @@ src/notifications.ts        # daily notification + background refresh task
 src/screens/OnboardingScreen.tsx
 src/screens/HomeScreen.tsx
 ```
+
+## Deploying
+
+### Web (GitHub Pages) — already set up
+
+Every push to `main` runs
+[.github/workflows/deploy-web.yml](.github/workflows/deploy-web.yml), which
+exports the web build and publishes it to
+https://sivarajh.github.io/weather_wardrobe/.
+
+### Mobile (iOS / Android)
+
+Use [EAS](https://docs.expo.dev/eas/) (Expo Application Services):
+
+```bash
+npm install -g eas-cli
+eas login            # free Expo account
+eas build:configure
+```
+
+1. **Share with friends / testers (no store):**
+   `eas build --profile preview --platform android` produces an installable
+   APK you can send to anyone. For iOS, internal distribution requires an
+   Apple Developer account ($99/yr) and registered device UDIDs.
+2. **TestFlight / Play internal testing:**
+   `eas build --platform all` then `eas submit` uploads to TestFlight (iOS)
+   and the Play Console (Android, $25 one-time developer fee).
+3. **App Store / Play Store release:** same as above, then promote the build
+   through the store consoles. Remember store listing assets (screenshots in
+   `screenshots/` are a start) and a privacy policy URL — the app collects
+   location, so both stores require one.
+4. **Over-the-air JS updates** after release: `eas update` ships JS-only
+   changes to installed apps without a store review.
+
+EAS free tier includes a build queue; builds run in Expo's cloud, so no
+local Xcode/Android Studio setup is needed.
 
 ## Known limitations
 

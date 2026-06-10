@@ -83,7 +83,13 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
         <Animated.View entering={FadeIn.duration(350)}>
           <Text style={styles.errorText}>{error ?? "No data available."}</Text>
         </Animated.View>
-        <Springy style={styles.cta} onPress={refresh}>
+        <Springy
+          style={styles.cta}
+          onPress={() => {
+            setLoading(true);
+            refresh();
+          }}
+        >
           <Text style={styles.ctaText}>Try again</Text>
         </Springy>
       </View>

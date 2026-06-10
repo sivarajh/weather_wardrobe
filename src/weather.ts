@@ -1,4 +1,5 @@
 import * as Location from "expo-location";
+import { Platform } from "react-native";
 import { TempBand, WeatherSnapshot } from "./types";
 
 // WMO weather interpretation codes used by Open-Meteo
@@ -48,26 +49,76 @@ export interface LocatedPlace {
   label: string;
 }
 
-export async function getCurrentPlace(): Promise<LocatedPlace> {
-  const { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== "granted") {
-    throw new Error("Location permission is required to fetch local weather.");
+// Web path: talk to the browser's geolocation API directly. The expo-location
+// web shim depends on the Permissions API (unreliable in Safari) and calls
+// getCurrentPosition without a timeout, which can hang forever in Safari.
+function getWebPosition(): Promise<{ latitude: number; longitude: number }> {
+  if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
+    return Promise.reject(
+      new Error("This browser doesn't support location services.")
+    );
   }
-  const position =
-    (await Location.getLastKnownPositionAsync()) ??
-    (await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    }));
-  const { latitude, longitude } = position.coords;
+  if (typeof window !== "undefined" && !window.isSecureContext) {
+    return Promise.reject(
+      new Error(
+        "Browsers only allow location on secure pages. Open the app over https (or http://localhost in development) and try again."
+      )
+    );
+  }
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) =>
+        resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        }),
+      (err) => {
+        const messages: Record<number, string> = {
+          1: "Location permission was denied. Allow location access for this site in your browser settings, then try again.",
+          2: "Your location couldn't be determined. Check that Location Services are enabled for your browser, then try again.",
+          3: "Finding your location took too long. Try again.",
+        };
+        reject(new Error(messages[err.code] ?? "Couldn't get your location."));
+      },
+      { enableHighAccuracy: false, timeout: 20000, maximumAge: 5 * 60 * 1000 }
+    );
+  });
+}
+
+export async function getCurrentPlace(): Promise<LocatedPlace> {
+  let latitude: number;
+  let longitude: number;
+
+  if (Platform.OS === "web") {
+    ({ latitude, longitude } = await getWebPosition());
+  } else {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      throw new Error(
+        "Location permission is required to fetch local weather."
+      );
+    }
+    const position =
+      (await Location.getLastKnownPositionAsync()) ??
+      (await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      }));
+    ({ latitude, longitude } = position.coords);
+  }
 
   let label = "";
-  try {
-    const [place] = await Location.reverseGeocodeAsync({ latitude, longitude });
-    if (place) {
-      label = place.city ?? place.subregion ?? place.region ?? "";
+  if (Platform.OS !== "web") {
+    try {
+      const [place] = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+      if (place) {
+        label = place.city ?? place.subregion ?? place.region ?? "";
+      }
+    } catch {
+      // reverse geocoding is best-effort; the fallback below covers it
     }
-  } catch {
-    // native reverse geocoding is unavailable on web; fall through
   }
   if (!label) {
     label = await reverseGeocodeFallback(latitude, longitude);

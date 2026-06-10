@@ -1,5 +1,6 @@
 import * as Location from "expo-location";
 import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TempBand, WeatherSnapshot } from "./types";
 
 // WMO weather interpretation codes used by Open-Meteo
@@ -85,7 +86,43 @@ function getWebPosition(): Promise<{ latitude: number; longitude: number }> {
   });
 }
 
+// Remember the last located place so refreshes within the TTL don't hit the
+// geolocation API at all — Safari re-prompts for permission on every direct
+// geolocation call, which gets annoying fast.
+const PLACE_CACHE_KEY = "weatherWardrobe.lastPlace";
+const PLACE_CACHE_TTL_MS = 30 * 60 * 1000;
+
+async function loadCachedPlace(): Promise<LocatedPlace | null> {
+  try {
+    const raw = await AsyncStorage.getItem(PLACE_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (Date.now() - cached.savedAt > PLACE_CACHE_TTL_MS) return null;
+    return {
+      latitude: cached.latitude,
+      longitude: cached.longitude,
+      label: cached.label,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function saveCachedPlace(place: LocatedPlace): Promise<void> {
+  try {
+    await AsyncStorage.setItem(
+      PLACE_CACHE_KEY,
+      JSON.stringify({ ...place, savedAt: Date.now() })
+    );
+  } catch {
+    // caching is best-effort
+  }
+}
+
 export async function getCurrentPlace(): Promise<LocatedPlace> {
+  const cached = await loadCachedPlace();
+  if (cached) return cached;
+
   let latitude: number;
   let longitude: number;
 
@@ -123,7 +160,9 @@ export async function getCurrentPlace(): Promise<LocatedPlace> {
   if (!label) {
     label = await reverseGeocodeFallback(latitude, longitude);
   }
-  return { latitude, longitude, label: label || "your area" };
+  const place = { latitude, longitude, label: label || "your area" };
+  await saveCachedPlace(place);
+  return place;
 }
 
 // Works on every platform including web (CORS-enabled, no API key).

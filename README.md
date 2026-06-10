@@ -38,6 +38,25 @@ npx expo start
 
 Scan the QR code with **Expo Go** (Android) or the Camera app (iOS).
 
+### Test in the browser (web)
+
+```bash
+npx expo start --web
+```
+
+This opens the app at http://localhost:8081 (or press `w` in an already
+running `npx expo start`). The browser will ask for location permission —
+allow it to see live weather and the outfit recommendation.
+
+Web limitations:
+
+- **No daily notifications** — `expo-notifications` scheduling isn't supported
+  on web; use a phone or simulator for that.
+- **No sample images** — the Unsplash search endpoint blocks cross-origin
+  browser requests (CORS), so the image strip hides itself on web. Everything
+  else (weather, recommendation, shopping links) works.
+- **City name shows as "your area"** — reverse geocoding is native-only.
+
 > **Note on background refresh:** `expo-background-task` and full notification
 > behavior require a development build for complete fidelity:
 >

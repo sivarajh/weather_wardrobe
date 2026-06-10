@@ -1,13 +1,16 @@
 {
   "expo": {
-    "name": "weatherBasedDress",
+    "name": "Weather Wardrobe",
     "slug": "weatherBasedDress",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["fetch", "processing"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -16,10 +19,26 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-background-task",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Weather Wardrobe uses your location to fetch local weather and suggest what to wear each day."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "daily-outfit"
+        }
+      ]
+    ]
   }
 }

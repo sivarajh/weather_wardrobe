@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Gender, Modesty, Preferences, StyleChoice } from "../types";
 import { DEFAULT_PREFS } from "../storage";
+import { colors, fonts, radius } from "../theme";
 
 const GENDERS: { value: Gender; label: string }[] = [
   { value: "female", label: "Women" },
@@ -156,46 +157,74 @@ export default function OnboardingScreen({ initial, onDone }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FDFBF7" },
+  container: { flex: 1, backgroundColor: colors.paper },
   content: { padding: 24, paddingTop: 72, paddingBottom: 48 },
-  heading: { fontSize: 28, fontWeight: "700", color: "#1F2937" },
-  sub: { fontSize: 15, color: "#6B7280", marginTop: 8, lineHeight: 22 },
+  heading: {
+    fontSize: 34,
+    fontFamily: fonts.serif,
+    fontWeight: "400",
+    color: colors.ink,
+    lineHeight: 42,
+  },
+  sub: {
+    fontSize: 15,
+    fontFamily: fonts.body,
+    color: colors.ink,
+    marginTop: 12,
+    lineHeight: 23,
+  },
   section: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#9CA3AF",
+    fontSize: 12,
+    fontFamily: fonts.mono,
+    color: colors.ink,
     textTransform: "uppercase",
-    letterSpacing: 1,
-    marginTop: 28,
-    marginBottom: 10,
+    letterSpacing: 1.5,
+    marginTop: 32,
+    marginBottom: 12,
   },
   row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingVertical: 10,
-    borderRadius: 22,
-    backgroundColor: "#FFFFFF",
+    borderRadius: radius.pill,
+    backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.ink,
   },
-  chipSelected: { backgroundColor: "#4F46E5", borderColor: "#4F46E5" },
-  chipText: { fontSize: 15, color: "#374151", fontWeight: "500" },
-  chipTextSelected: { color: "#FFFFFF" },
+  chipSelected: { backgroundColor: colors.lime, borderColor: colors.ink },
+  chipText: {
+    fontSize: 14,
+    color: colors.ink,
+    fontFamily: fonts.bodySemiBold,
+  },
+  chipTextSelected: { color: colors.ink },
   modestyCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 14,
+    borderColor: colors.ink,
+    borderRadius: radius.sm,
     padding: 14,
     marginBottom: 8,
   },
-  hint: { fontSize: 13, color: "#9CA3AF", marginTop: 2 },
+  hint: {
+    fontSize: 13,
+    fontFamily: fonts.body,
+    color: colors.gray,
+    marginTop: 2,
+  },
   cta: {
     marginTop: 36,
-    backgroundColor: "#4F46E5",
-    borderRadius: 14,
+    backgroundColor: colors.lime,
+    borderRadius: radius.sm,
     paddingVertical: 16,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.ink,
   },
-  ctaText: { color: "#FFFFFF", fontSize: 17, fontWeight: "700" },
+  ctaText: {
+    color: colors.ink,
+    fontSize: 15,
+    fontFamily: fonts.bodyBold,
+    letterSpacing: 0.3,
+  },
 });

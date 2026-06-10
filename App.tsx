@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import {
+  useFonts,
+  Manrope_400Regular,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+} from "@expo-google-fonts/manrope";
+import { colors } from "./src/theme";
 import { Preferences } from "./src/types";
 import { loadPreferences, savePreferences } from "./src/storage";
 import {
@@ -15,6 +22,11 @@ import { registerPWA } from "./src/pwa";
 registerPWA();
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Manrope_400Regular,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+  });
   const [booting, setBooting] = useState(true);
   const [prefs, setPrefs] = useState<Preferences | null>(null);
   const [editing, setEditing] = useState(false);
@@ -47,17 +59,17 @@ export default function App() {
     }
   };
 
-  if (booting) {
+  if (booting || !fontsLoaded) {
     return (
       <View
         style={{
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#FDFBF7",
+          backgroundColor: colors.paper,
         }}
       >
-        <ActivityIndicator size="large" color="#4F46E5" />
+        <ActivityIndicator size="large" color={colors.ink} />
       </View>
     );
   }

@@ -14,6 +14,7 @@ import { OutfitRecommendation, Preferences, WeatherSnapshot } from "../types";
 import { fetchWeather, getCurrentPlace } from "../weather";
 import { recommendOutfit } from "../outfits";
 import { fetchOutfitImages } from "../images";
+import { colors, fonts, radius } from "../theme";
 
 interface Props {
   prefs: Preferences;
@@ -59,7 +60,7 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#4F46E5" />
+        <ActivityIndicator size="large" color={colors.ink} />
         <Text style={styles.loadingText}>Checking your local weather…</Text>
       </View>
     );
@@ -170,19 +171,25 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FDFBF7" },
+  container: { flex: 1, backgroundColor: colors.paper },
   content: { padding: 24, paddingTop: 64, paddingBottom: 48 },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FDFBF7",
+    backgroundColor: colors.paper,
     padding: 24,
   },
-  loadingText: { marginTop: 12, color: "#6B7280", fontSize: 15 },
-  errorText: {
-    color: "#B91C1C",
+  loadingText: {
+    marginTop: 12,
+    color: colors.ink,
     fontSize: 15,
+    fontFamily: fonts.body,
+  },
+  errorText: {
+    color: colors.ink,
+    fontSize: 15,
+    fontFamily: fonts.body,
     textAlign: "center",
     marginBottom: 16,
   },
@@ -191,67 +198,124 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  place: { fontSize: 24, fontWeight: "700", color: "#1F2937" },
-  condition: { fontSize: 15, color: "#6B7280", marginTop: 2 },
-  settingsBtn: {
-    backgroundColor: "#EEF2FF",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 18,
+  place: {
+    fontSize: 30,
+    fontFamily: fonts.serif,
+    fontWeight: "400",
+    color: colors.ink,
   },
-  settingsText: { color: "#4F46E5", fontWeight: "600" },
+  condition: {
+    fontSize: 14,
+    fontFamily: fonts.body,
+    color: colors.gray,
+    marginTop: 2,
+  },
+  settingsBtn: {
+    backgroundColor: colors.lime,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.ink,
+  },
+  settingsText: {
+    color: colors.ink,
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 13,
+  },
   weatherCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#4F46E5",
-    borderRadius: 18,
+    backgroundColor: colors.lavender,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.ink,
     padding: 20,
-    marginTop: 18,
+    marginTop: 20,
   },
-  temp: { fontSize: 44, fontWeight: "800", color: "#FFFFFF" },
+  temp: {
+    fontSize: 48,
+    fontFamily: fonts.serif,
+    fontWeight: "400",
+    color: colors.ink,
+  },
   weatherMeta: { marginLeft: 18 },
-  metaText: { color: "#E0E7FF", fontSize: 14, marginVertical: 1 },
-  outfitTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1F2937",
-    marginTop: 28,
+  metaText: {
+    color: colors.ink,
+    fontSize: 13,
+    fontFamily: fonts.body,
+    marginVertical: 1,
   },
-  summary: { fontSize: 15, color: "#6B7280", marginTop: 6, lineHeight: 22 },
+  outfitTitle: {
+    fontSize: 26,
+    fontFamily: fonts.serif,
+    fontWeight: "400",
+    color: colors.ink,
+    marginTop: 30,
+  },
+  summary: {
+    fontSize: 15,
+    fontFamily: fonts.body,
+    color: colors.gray,
+    marginTop: 6,
+    lineHeight: 23,
+  },
   imageRow: { marginTop: 16 },
   image: {
     width: 180,
     height: 225,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     marginRight: 10,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: colors.offWhite,
   },
-  imageCaption: { fontSize: 12, color: "#9CA3AF", marginTop: 8 },
+  imageCaption: {
+    fontSize: 11,
+    fontFamily: fonts.mono,
+    color: colors.gray,
+    marginTop: 8,
+  },
   section: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#9CA3AF",
+    fontSize: 12,
+    fontFamily: fonts.mono,
+    color: colors.ink,
     textTransform: "uppercase",
-    letterSpacing: 1,
-    marginTop: 26,
-    marginBottom: 8,
+    letterSpacing: 1.5,
+    marginTop: 30,
+    marginBottom: 10,
   },
-  listItem: { fontSize: 15, color: "#374151", marginVertical: 3, lineHeight: 22 },
+  listItem: {
+    fontSize: 15,
+    fontFamily: fonts.body,
+    color: colors.ink,
+    marginVertical: 3,
+    lineHeight: 23,
+  },
   shopCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 14,
+    borderColor: colors.ink,
+    borderRadius: radius.sm,
     padding: 14,
     marginBottom: 8,
   },
-  shopLabel: { fontSize: 15, fontWeight: "600", color: "#4F46E5" },
-  shopNote: { fontSize: 13, color: "#9CA3AF", marginTop: 2 },
+  shopLabel: {
+    fontSize: 15,
+    fontFamily: fonts.bodySemiBold,
+    color: colors.ink,
+  },
+  shopNote: {
+    fontSize: 13,
+    fontFamily: fonts.body,
+    color: colors.gray,
+    marginTop: 2,
+  },
   cta: {
-    backgroundColor: "#4F46E5",
-    borderRadius: 14,
+    backgroundColor: colors.lime,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.ink,
     paddingVertical: 14,
     paddingHorizontal: 28,
   },
-  ctaText: { color: "#FFFFFF", fontSize: 16, fontWeight: "700" },
+  ctaText: { color: colors.ink, fontSize: 15, fontFamily: fonts.bodyBold },
 });

@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@expo-google-fonts/manrope": "^0.4.2",
     "@expo/metro-runtime": "~56.0.14",
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~56.0.9",
     "expo-background-task": "~56.0.17",
+    "expo-font": "~56.0.5",
     "expo-image": "~56.0.10",
     "expo-location": "~56.0.16",
     "expo-notifications": "~56.0.16",

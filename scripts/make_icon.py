@@ -84,7 +84,6 @@ icon = Image.alpha_composite(icon, glyph)
 icon = icon.convert("RGB")
 
 icon.save("assets/icon.png")
-icon.save("assets/splash-icon.png")
 icon.resize((512, 512), Image.LANCZOS).save("public/icons/icon-512.png")
 icon.resize((192, 192), Image.LANCZOS).save("public/icons/icon-192.png")
 icon.resize((48, 48), Image.LANCZOS).save("assets/favicon.png")
@@ -97,4 +96,8 @@ fg.paste(small, ((SIZE - 640) // 2, (SIZE - 640) // 2), small)
 fg.save("assets/android-icon-foreground.png")
 Image.new("RGB", (SIZE, SIZE), LAVENDER).save("assets/android-icon-background.png")
 fg.save("assets/android-icon-monochrome.png")
+
+# Splash: white hanger glyph on transparent — the splash screen background
+# color comes from the expo-splash-screen config in app.json.
+glyph.save("assets/splash-icon.png")
 print("icon set written")

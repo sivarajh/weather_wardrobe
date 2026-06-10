@@ -6,16 +6,24 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import Animated, { FadeIn, FadeInDown, FadeInRight } from "react-native-reanimated";
 import { OutfitRecommendation, Preferences, WeatherSnapshot } from "../types";
 import { fetchWeather, getCurrentPlace } from "../weather";
 import { recommendOutfit } from "../outfits";
 import { fetchOutfitImages } from "../images";
 import { colors, fonts, gradient, radius, shadow } from "../theme";
+import Springy from "../components/Springy";
+
+// Stagger for top-level blocks as the screen builds in.
+const enter = (slot: number) =>
+  FadeInDown.delay(60 * slot)
+    .duration(450)
+    .springify()
+    .damping(16);
 
 interface Props {
   prefs: Preferences;
@@ -61,8 +69,10 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={colors.ink} />
-        <Text style={styles.loadingText}>Checking your local weather…</Text>
+        <Animated.View entering={FadeIn.duration(400)}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingText}>Checking your local weather…</Text>
+        </Animated.View>
       </View>
     );
   }
@@ -70,10 +80,12 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
   if (error || !weather || !outfit) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>{error ?? "No data available."}</Text>
-        <TouchableOpacity style={styles.cta} onPress={refresh}>
+        <Animated.View entering={FadeIn.duration(350)}>
+          <Text style={styles.errorText}>{error ?? "No data available."}</Text>
+        </Animated.View>
+        <Springy style={styles.cta} onPress={refresh}>
           <Text style={styles.ctaText}>Try again</Text>
-        </TouchableOpacity>
+        </Springy>
       </View>
     );
   }
@@ -86,92 +98,107 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
         <RefreshControl refreshing={false} onRefresh={refresh} />
       }
     >
-      <View style={styles.headerRow}>
+      <Animated.View entering={enter(0)} style={styles.headerRow}>
         <View>
           <Text style={styles.place}>{placeLabel}</Text>
           <Text style={styles.condition}>{weather.condition}</Text>
         </View>
-        <TouchableOpacity onPress={onEditPrefs} style={styles.settingsBtn}>
+        <Springy onPress={onEditPrefs} style={styles.settingsBtn}>
           <Text style={styles.settingsText}>⚙ Style</Text>
-        </TouchableOpacity>
-      </View>
+        </Springy>
+      </Animated.View>
 
-      <LinearGradient
-        colors={gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.weatherCard}
-      >
-        <Text style={styles.temp}>{Math.round(weather.temperatureC)}°C</Text>
-        <View style={styles.weatherMeta}>
-          <Text style={styles.metaText}>
-            Feels like {Math.round(weather.feelsLikeC)}°C
-          </Text>
-          <Text style={styles.metaText}>
-            💨 {Math.round(weather.windKph)} km/h · ☔{" "}
-            {weather.precipitationProbability}% rain
-          </Text>
-          {weather.observedAt !== "" && (
-            <Text style={styles.metaText}>As of {weather.observedAt}</Text>
-          )}
-        </View>
-      </LinearGradient>
+      <Animated.View entering={enter(1)}>
+        <LinearGradient
+          colors={gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.weatherCard}
+        >
+          <Text style={styles.temp}>{Math.round(weather.temperatureC)}°C</Text>
+          <View style={styles.weatherMeta}>
+            <Text style={styles.metaText}>
+              Feels like {Math.round(weather.feelsLikeC)}°C
+            </Text>
+            <Text style={styles.metaText}>
+              💨 {Math.round(weather.windKph)} km/h · ☔{" "}
+              {weather.precipitationProbability}% rain
+            </Text>
+            {weather.observedAt !== "" && (
+              <Text style={styles.metaText}>As of {weather.observedAt}</Text>
+            )}
+          </View>
+        </LinearGradient>
+      </Animated.View>
 
-      <Text style={styles.outfitTitle}>{outfit.title}</Text>
-      <Text style={styles.summary}>{outfit.summary}</Text>
+      <Animated.View entering={enter(2)}>
+        <Text style={styles.outfitTitle}>{outfit.title}</Text>
+        <Text style={styles.summary}>{outfit.summary}</Text>
+      </Animated.View>
 
       {imageUrls.length > 0 && (
-        <>
+        <Animated.View entering={FadeIn.duration(400)}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.imageRow}
           >
-            {imageUrls.map((url) => (
-              <Image
+            {imageUrls.map((url, i) => (
+              <Animated.View
                 key={url}
-                source={{ uri: url }}
-                style={styles.image}
-                contentFit="cover"
-                transition={200}
-              />
+                entering={FadeInRight.delay(120 * i)
+                  .duration(500)
+                  .springify()
+                  .damping(18)}
+              >
+                <Image
+                  source={{ uri: url }}
+                  style={styles.image}
+                  contentFit="cover"
+                  transition={300}
+                />
+              </Animated.View>
             ))}
           </ScrollView>
           <Text style={styles.imageCaption}>
             Sample looks matched to your style (via Unsplash)
           </Text>
-        </>
+        </Animated.View>
       )}
 
-      <Text style={styles.section}>What to wear</Text>
-      {outfit.pieces.map((piece) => (
-        <Text key={piece} style={styles.listItem}>
-          •  {piece}
-        </Text>
-      ))}
+      <Animated.View entering={enter(3)}>
+        <Text style={styles.section}>What to wear</Text>
+        {outfit.pieces.map((piece) => (
+          <Text key={piece} style={styles.listItem}>
+            •  {piece}
+          </Text>
+        ))}
+      </Animated.View>
 
       {outfit.accessories.length > 0 && (
-        <>
+        <Animated.View entering={enter(4)}>
           <Text style={styles.section}>Weather essentials</Text>
           {outfit.accessories.map((item) => (
             <Text key={item} style={styles.listItem}>
               •  {item}
             </Text>
           ))}
-        </>
+        </Animated.View>
       )}
 
-      <Text style={styles.section}>Where to buy — best & cheapest</Text>
-      {outfit.shoppingLinks.map((link) => (
-        <TouchableOpacity
-          key={link.url}
-          style={styles.shopCard}
-          onPress={() => Linking.openURL(link.url)}
-        >
-          <Text style={styles.shopLabel}>{link.label}</Text>
-          <Text style={styles.shopNote}>{link.note}</Text>
-        </TouchableOpacity>
-      ))}
+      <Animated.View entering={enter(5)}>
+        <Text style={styles.section}>Where to buy — best & cheapest</Text>
+        {outfit.shoppingLinks.map((link) => (
+          <Springy
+            key={link.url}
+            style={styles.shopCard}
+            onPress={() => Linking.openURL(link.url)}
+          >
+            <Text style={styles.shopLabel}>{link.label}</Text>
+            <Text style={styles.shopNote}>{link.note}</Text>
+          </Springy>
+        ))}
+      </Animated.View>
     </ScrollView>
   );
 }

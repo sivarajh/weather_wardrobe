@@ -32,7 +32,7 @@ self.addEventListener("notificationclick", (event) => {
       .then((clients) => {
         const open = clients.find((c) => "focus" in c);
         if (open) return open.focus();
-        return self.clients.openWindow("/");
+        return self.clients.openWindow("./");
       })
   );
 });

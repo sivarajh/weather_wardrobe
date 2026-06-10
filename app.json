@@ -25,6 +25,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "experiments": {
+      "baseUrl": "/weather_wardrobe"
+    },
     "plugins": [
       "expo-background-task",
       [

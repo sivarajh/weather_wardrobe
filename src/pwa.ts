@@ -8,10 +8,12 @@ export function registerPWA(): void {
 
   const head = document.head;
 
+  // Relative URLs so the app works both at the domain root (localhost dev)
+  // and under a subpath (GitHub Pages serves at /weather_wardrobe/).
   if (!head.querySelector('link[rel="manifest"]')) {
     const manifest = document.createElement("link");
     manifest.rel = "manifest";
-    manifest.href = "/manifest.json";
+    manifest.href = "manifest.json";
     head.appendChild(manifest);
   }
 
@@ -25,13 +27,13 @@ export function registerPWA(): void {
   if (!head.querySelector('link[rel="apple-touch-icon"]')) {
     const appleIcon = document.createElement("link");
     appleIcon.rel = "apple-touch-icon";
-    appleIcon.href = "/icons/icon-192.png";
+    appleIcon.href = "icons/icon-192.png";
     head.appendChild(appleIcon);
   }
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
-      .register("/sw.js")
+      .register("sw.js")
       .catch((err) => console.warn("Service worker registration failed", err));
   }
 }

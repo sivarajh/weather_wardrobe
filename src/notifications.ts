@@ -87,8 +87,8 @@ let webTimer: ReturnType<typeof setTimeout> | null = null;
 async function showWebNotification(title: string, body: string): Promise<void> {
   const options: NotificationOptions = {
     body,
-    icon: "/icons/icon-192.png",
-    badge: "/icons/icon-192.png",
+    icon: "icons/icon-192.png",
+    badge: "icons/icon-192.png",
     tag: "daily-outfit",
   };
   try {

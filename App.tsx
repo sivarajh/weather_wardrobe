@@ -10,6 +10,9 @@ import {
 } from "./src/notifications";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
 import HomeScreen from "./src/screens/HomeScreen";
+import { registerPWA } from "./src/pwa";
+
+registerPWA();
 
 export default function App() {
   const [booting, setBooting] = useState(true);

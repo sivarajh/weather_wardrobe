@@ -48,14 +48,30 @@ This opens the app at http://localhost:8081 (or press `w` in an already
 running `npx expo start`). The browser will ask for location permission —
 allow it to see live weather and the outfit recommendation.
 
+### PWA install & web notifications
+
+The web version is an installable PWA (manifest + service worker, generated
+icons). In Chrome/Edge use the install icon in the address bar; on iOS Safari
+use Share → "Add to Home Screen".
+
+Daily notifications on web use the browser **Notification API**: completing
+onboarding asks for notification permission, then an in-page scheduler fires
+the outfit notification at your chosen time and re-arms for the next day.
+Notifications display through the service worker, so clicking one focuses or
+reopens the app.
+
 Web limitations:
 
-- **No daily notifications** — `expo-notifications` scheduling isn't supported
-  on web; use a phone or simulator for that.
+- **Notifications fire while the app/PWA is open** (including background
+  tabs), but not when it's fully closed — client-only web apps can't do that;
+  it requires a Web Push server (VAPID + push service). Use the native app
+  for fully offline scheduled notifications.
 - **No sample images** — the Unsplash search endpoint blocks cross-origin
   browser requests (CORS), so the image strip hides itself on web. Everything
   else (weather, recommendation, shopping links) works.
-- **City name shows as "your area"** — reverse geocoding is native-only.
+- **PWA install requires HTTPS** in production (localhost is exempt during
+  development). Host the `npx expo export --platform web` output (which
+  includes `manifest.json`, `sw.js`, and icons) on any HTTPS static host.
 
 > **Note on background refresh:** `expo-background-task` and full notification
 > behavior require a development build for complete fidelity:

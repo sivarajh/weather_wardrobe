@@ -1,4 +1,5 @@
 import {
+  AgeGroup,
   Gender,
   Modesty,
   OutfitRecommendation,
@@ -407,6 +408,396 @@ const MALE: OutfitMatrix = {
   },
 };
 
+const GIRL: OutfitMatrix = {
+  hot: {
+    casual: {
+      title: "Sunny day sundress",
+      pieces: ["Cotton sundress", "Lightweight sandals", "Sun hat"],
+      searchQuery: "girls cotton sundress summer",
+    },
+    formal: {
+      title: "Pretty summer dress",
+      pieces: ["Floral smock dress", "Mary Jane shoes", "Small hair bow"],
+      searchQuery: "girls floral smock dress",
+    },
+    sporty: {
+      title: "Active summer kit",
+      pieces: ["Athletic tank", "Shorts", "Supportive sneakers", "Cap"],
+      searchQuery: "girls athletic tank shorts",
+    },
+    streetwear: {
+      title: "Cool casual street",
+      pieces: ["Graphic tee", "Denim shorts", "Sneakers", "Mini backpack"],
+      searchQuery: "girls graphic tee denim shorts",
+    },
+    bohemian: {
+      title: "Boho summer look",
+      pieces: ["Flowy tiered skirt", "Cropped tank", "Sandals", "Headband"],
+      searchQuery: "girls boho tiered skirt tank",
+    },
+    traditional: {
+      title: "Festive ethnic",
+      pieces: ["Cotton lehenga or salwar kameez", "Sandals", "Light dupatta"],
+      searchQuery: "girls cotton salwar kameez summer",
+    },
+  },
+  warm: {
+    casual: {
+      title: "Breezy warm-day outfit",
+      pieces: ["Short-sleeve top", "Skirt or shorts", "Canvas sneakers"],
+      searchQuery: "girls short sleeve top skirt",
+    },
+    formal: {
+      title: "Smart warm-day look",
+      pieces: ["Puff-sleeve blouse", "Pleated skirt", "Ballet flats"],
+      searchQuery: "girls puff sleeve blouse pleated skirt",
+    },
+    sporty: {
+      title: "Warm-day play kit",
+      pieces: ["Performance tee", "Bike shorts or joggers", "Running shoes"],
+      searchQuery: "girls performance tee bike shorts",
+    },
+    streetwear: {
+      title: "Casual street style",
+      pieces: ["Oversized tee", "Leggings", "High-top sneakers"],
+      searchQuery: "girls oversized tee leggings",
+    },
+    bohemian: {
+      title: "Boho warm layers",
+      pieces: ["Embroidered top", "Midi skirt", "Espadrilles"],
+      searchQuery: "girls embroidered top midi skirt",
+    },
+    traditional: {
+      title: "Everyday ethnic",
+      pieces: ["Cotton kurti", "Churidar", "Sandals"],
+      searchQuery: "girls cotton kurti churidar",
+    },
+  },
+  mild: {
+    casual: {
+      title: "Light-layer casual",
+      pieces: ["Long-sleeve top", "Jeans or jeggings", "Light cardigan", "Sneakers"],
+      searchQuery: "girls long sleeve top cardigan jeans",
+    },
+    formal: {
+      title: "Smart mild-day outfit",
+      pieces: ["Ruffled blouse", "Tailored trousers", "Mary Janes"],
+      searchQuery: "girls ruffled blouse tailored trousers",
+    },
+    sporty: {
+      title: "Active mild day",
+      pieces: ["Long-sleeve athletic top", "Leggings", "Light zip jacket"],
+      searchQuery: "girls long sleeve athletic top leggings",
+    },
+    streetwear: {
+      title: "Hoodie casual",
+      pieces: ["Hoodie", "Jogger pants", "Chunky sneakers"],
+      searchQuery: "girls hoodie jogger pants",
+    },
+    bohemian: {
+      title: "Boho knit layers",
+      pieces: ["Knit cardigan", "Midi dress", "Ankle boots"],
+      searchQuery: "girls knit cardigan midi dress",
+    },
+    traditional: {
+      title: "Layered ethnic",
+      pieces: ["Kurti set with light shawl", "Leggings", "Closed flats"],
+      searchQuery: "girls kurti set shawl",
+    },
+  },
+  cool: {
+    casual: {
+      title: "Cosy cool-day outfit",
+      pieces: ["Sweater", "Jeans", "Utility jacket", "Ankle boots"],
+      searchQuery: "girls sweater utility jacket jeans",
+    },
+    formal: {
+      title: "Polished cool look",
+      pieces: ["Knit turtleneck", "Pleated skirt", "Tights", "Mary Janes"],
+      searchQuery: "girls turtleneck pleated skirt tights",
+    },
+    sporty: {
+      title: "Cool training kit",
+      pieces: ["Thermal top", "Running tights", "Zip midlayer", "Gloves"],
+      searchQuery: "girls thermal top running tights",
+    },
+    streetwear: {
+      title: "Layered street style",
+      pieces: ["Hoodie", "Bomber jacket", "Straight-leg jeans", "Sneakers", "Beanie"],
+      searchQuery: "girls bomber jacket hoodie jeans",
+    },
+    bohemian: {
+      title: "Autumn boho",
+      pieces: ["Sweater dress", "Tights", "Long knit cardi", "Ankle boots"],
+      searchQuery: "girls sweater dress knit cardigan",
+    },
+    traditional: {
+      title: "Warm ethnic layers",
+      pieces: ["Kurta with warm leggings", "Pashmina shawl", "Closed shoes"],
+      searchQuery: "girls kurta pashmina shawl",
+    },
+  },
+  cold: {
+    casual: {
+      title: "Winter casual",
+      pieces: ["Knit sweater", "Fleece-lined leggings", "Puffer jacket", "Boots", "Scarf"],
+      searchQuery: "girls puffer jacket knit sweater winter",
+    },
+    formal: {
+      title: "Winter dress-up",
+      pieces: ["Velvet dress", "Tights", "Warm coat", "Dress boots"],
+      searchQuery: "girls velvet dress winter coat",
+    },
+    sporty: {
+      title: "Cold-weather active",
+      pieces: ["Thermal top + fleece", "Winter tights", "Windproof jacket", "Headband"],
+      searchQuery: "girls winter running jacket thermal tights",
+    },
+    streetwear: {
+      title: "Winter street",
+      pieces: ["Oversized puffer", "Hoodie", "Cargo pants", "Winter sneakers", "Beanie"],
+      searchQuery: "girls oversized puffer hoodie winter",
+    },
+    bohemian: {
+      title: "Boho winter",
+      pieces: ["Knit maxi dress", "Shearling-lined coat", "Tall boots", "Wool scarf"],
+      searchQuery: "girls knit maxi dress shearling coat",
+    },
+    traditional: {
+      title: "Winter ethnic",
+      pieces: ["Woolen kurti", "Warm churidar", "Heavy shawl", "Boots"],
+      searchQuery: "girls woolen kurti heavy shawl",
+    },
+  },
+  freezing: {
+    casual: {
+      title: "Deep-freeze casual",
+      pieces: ["Thermal base layer", "Heavy sweater", "Down parka", "Snow boots", "Beanie + gloves + scarf"],
+      searchQuery: "girls down parka thermal base layer",
+    },
+    formal: {
+      title: "Freezing-day dressed-up",
+      pieces: ["Thermal layer under dress", "Long down coat", "Insulated boots", "Wool accessories"],
+      searchQuery: "girls long down coat dress winter",
+    },
+    sporty: {
+      title: "Sub-zero active",
+      pieces: ["Heavy thermal layers", "Windproof insulated jacket", "Thermal tights + shell", "Balaclava"],
+      searchQuery: "girls insulated winter training jacket",
+    },
+    streetwear: {
+      title: "Arctic street",
+      pieces: ["Long puffer coat", "Fleece hoodie", "Thermal-lined pants", "Snow sneakers"],
+      searchQuery: "girls long puffer coat fleece hoodie",
+    },
+    bohemian: {
+      title: "Boho in the snow",
+      pieces: ["Layered knit dress", "Maxi puffer coat", "Fleece tights", "Snow boots"],
+      searchQuery: "girls maxi puffer coat knit dress",
+    },
+    traditional: {
+      title: "Freezing-day ethnic",
+      pieces: ["Heavy woolen suit", "Thermal innerwear", "Kashmiri shawl", "Lined boots"],
+      searchQuery: "girls woolen suit kashmiri shawl",
+    },
+  },
+};
+
+const BOY: OutfitMatrix = {
+  hot: {
+    casual: {
+      title: "Hot-day casual",
+      pieces: ["Lightweight cotton tee", "Shorts", "Canvas sneakers or sandals"],
+      searchQuery: "boys cotton tee shorts summer",
+    },
+    formal: {
+      title: "Smart summer look",
+      pieces: ["Short-sleeve button-up shirt", "Chino shorts", "Loafers"],
+      searchQuery: "boys button up shirt chino shorts",
+    },
+    sporty: {
+      title: "Hot training kit",
+      pieces: ["Moisture-wicking tee", "Training shorts", "Breathable sneakers", "Cap"],
+      searchQuery: "boys moisture wicking tee training shorts",
+    },
+    streetwear: {
+      title: "Summer street",
+      pieces: ["Oversized graphic tee", "Cargo shorts", "Low-top sneakers"],
+      searchQuery: "boys oversized graphic tee cargo shorts",
+    },
+    bohemian: {
+      title: "Relaxed casual",
+      pieces: ["Printed short-sleeve shirt", "Drawstring shorts", "Sandals"],
+      searchQuery: "boys printed shirt drawstring shorts",
+    },
+    traditional: {
+      title: "Light ethnic",
+      pieces: ["Cotton kurta", "Pyjama pants", "Sandals"],
+      searchQuery: "boys cotton kurta pyjama summer",
+    },
+  },
+  warm: {
+    casual: {
+      title: "Warm-day casual",
+      pieces: ["Polo shirt", "Chinos or light jeans", "White sneakers"],
+      searchQuery: "boys polo shirt chinos",
+    },
+    formal: {
+      title: "Smart casual",
+      pieces: ["Oxford shirt", "Slim chinos", "Loafers"],
+      searchQuery: "boys oxford shirt slim chinos",
+    },
+    sporty: {
+      title: "Warm training",
+      pieces: ["Performance tee", "Shorts or joggers", "Running shoes"],
+      searchQuery: "boys performance tee joggers",
+    },
+    streetwear: {
+      title: "Street basics",
+      pieces: ["Graphic tee", "Relaxed jeans", "Retro sneakers", "Cap"],
+      searchQuery: "boys graphic tee relaxed jeans",
+    },
+    bohemian: {
+      title: "Boho casual",
+      pieces: ["Patterned shirt", "Loose cotton pants", "Espadrilles"],
+      searchQuery: "boys patterned shirt loose cotton pants",
+    },
+    traditional: {
+      title: "Everyday ethnic",
+      pieces: ["Short kurta", "Jeans or pyjama", "Sandals"],
+      searchQuery: "boys short kurta jeans",
+    },
+  },
+  mild: {
+    casual: {
+      title: "Light-layer casual",
+      pieces: ["Long-sleeve tee or flannel", "Jeans", "Light bomber jacket", "Sneakers"],
+      searchQuery: "boys flannel shirt bomber jacket jeans",
+    },
+    formal: {
+      title: "Blazer weather",
+      pieces: ["Dress shirt", "Chino trousers", "Unstructured blazer", "Oxford shoes"],
+      searchQuery: "boys blazer dress shirt chinos",
+    },
+    sporty: {
+      title: "Mild-day active",
+      pieces: ["Long-sleeve training top", "Joggers", "Light windbreaker"],
+      searchQuery: "boys windbreaker joggers training",
+    },
+    streetwear: {
+      title: "Hoodie season",
+      pieces: ["Hoodie", "Cargo pants", "High-top sneakers"],
+      searchQuery: "boys hoodie cargo pants streetwear",
+    },
+    bohemian: {
+      title: "Boho with knit",
+      pieces: ["Open-knit sweater", "Corduroy pants", "Desert boots"],
+      searchQuery: "boys open knit sweater corduroy pants",
+    },
+    traditional: {
+      title: "Layered ethnic",
+      pieces: ["Kurta with Nehru jacket", "Churidar or jeans", "Sandals"],
+      searchQuery: "boys kurta nehru jacket",
+    },
+  },
+  cool: {
+    casual: {
+      title: "Cool-day layers",
+      pieces: ["Crewneck sweater", "Jeans", "Field jacket", "Boots"],
+      searchQuery: "boys crewneck sweater field jacket",
+    },
+    formal: {
+      title: "Cool-weather smart",
+      pieces: ["Merino sweater over shirt", "Chino trousers", "Wool coat", "Leather boots"],
+      searchQuery: "boys merino sweater wool coat",
+    },
+    sporty: {
+      title: "Cool training",
+      pieces: ["Thermal base layer", "Joggers", "Zip midlayer", "Gloves"],
+      searchQuery: "boys thermal base layer joggers",
+    },
+    streetwear: {
+      title: "Street layers",
+      pieces: ["Hoodie under bomber jacket", "Straight jeans", "Chunky sneakers", "Beanie"],
+      searchQuery: "boys bomber jacket hoodie beanie",
+    },
+    bohemian: {
+      title: "Boho autumn",
+      pieces: ["Chunky cardigan", "Henley top", "Relaxed trousers", "Boots"],
+      searchQuery: "boys chunky cardigan henley",
+    },
+    traditional: {
+      title: "Warm ethnic",
+      pieces: ["Kurta with woolen Nehru jacket", "Warm churidar", "Closed shoes"],
+      searchQuery: "boys woolen nehru jacket kurta",
+    },
+  },
+  cold: {
+    casual: {
+      title: "Winter casual",
+      pieces: ["Heavy knit sweater", "Lined jeans", "Puffer jacket", "Insulated boots", "Scarf"],
+      searchQuery: "boys puffer jacket knit sweater winter",
+    },
+    formal: {
+      title: "Winter smart",
+      pieces: ["Turtleneck or shirt + sweater", "Wool trousers", "Long wool coat", "Gloves"],
+      searchQuery: "boys long wool coat turtleneck",
+    },
+    sporty: {
+      title: "Cold training",
+      pieces: ["Thermal layers", "Winter tights + shell pants", "Insulated jacket", "Headband"],
+      searchQuery: "boys insulated jacket winter thermal",
+    },
+    streetwear: {
+      title: "Winter street",
+      pieces: ["Oversized puffer", "Fleece hoodie", "Cargo pants", "Winter sneakers", "Beanie"],
+      searchQuery: "boys oversized puffer fleece hoodie",
+    },
+    bohemian: {
+      title: "Boho winter",
+      pieces: ["Shawl-collar cardigan", "Thermal henley", "Wool pants", "Snow boots"],
+      searchQuery: "boys shawl collar cardigan wool pants",
+    },
+    traditional: {
+      title: "Winter ethnic",
+      pieces: ["Woolen kurta", "Thermal innerwear", "Heavy shawl", "Boots"],
+      searchQuery: "boys woolen kurta winter shawl",
+    },
+  },
+  freezing: {
+    casual: {
+      title: "Deep-freeze casual",
+      pieces: ["Thermal base layer", "Heavy sweater", "Down parka", "Snow boots", "Beanie + gloves + scarf"],
+      searchQuery: "boys down parka thermal base layer",
+    },
+    formal: {
+      title: "Freezing-day smart",
+      pieces: ["Thermals under shirt + sweater", "Heavy wool coat", "Insulated boots", "Cashmere scarf + gloves"],
+      searchQuery: "boys heavy wool coat thermal winter",
+    },
+    sporty: {
+      title: "Sub-zero active",
+      pieces: ["Double thermal layers", "Windproof insulated jacket", "Thermal tights + shell", "Balaclava"],
+      searchQuery: "boys windproof insulated jacket thermal",
+    },
+    streetwear: {
+      title: "Arctic street",
+      pieces: ["Long puffer coat", "Fleece hoodie", "Thermal-lined pants", "Snow sneakers"],
+      searchQuery: "boys long puffer coat thermal pants",
+    },
+    bohemian: {
+      title: "Boho in the snow",
+      pieces: ["Layered knits", "Shearling coat", "Wool pants", "Snow boots"],
+      searchQuery: "boys shearling coat layered knits",
+    },
+    traditional: {
+      title: "Freezing-day ethnic",
+      pieces: ["Heavy phiran or woolen sherwani", "Thermal innerwear", "Pashmina shawl", "Lined boots"],
+      searchQuery: "boys woolen phiran pashmina shawl",
+    },
+  },
+};
+
 // Modesty adjustments: swaps and additions applied on top of the base outfit.
 function applyModesty(
   template: OutfitTemplate,
@@ -506,18 +897,30 @@ export function recommendOutfit(
   weather: WeatherSnapshot,
   gender: Gender,
   style: StyleChoice,
-  modesty: Modesty
+  modesty: Modesty,
+  ageGroup?: AgeGroup
 ): OutfitRecommendation {
-  // Nonbinary users get the more gender-neutral male matrix as a base;
-  // image keywords are made neutral below.
-  const matrix = gender === "female" ? FEMALE : MALE;
+  let matrix: OutfitMatrix;
+  if (gender === "girl") {
+    matrix = GIRL;
+  } else if (gender === "boy") {
+    matrix = BOY;
+  } else if (gender === "female") {
+    matrix = FEMALE;
+  } else {
+    // male and nonbinary use the MALE matrix; nonbinary gets "unisex" prefix below
+    matrix = MALE;
+  }
+
   const base = matrix[weather.band][style];
   const adjusted = applyModesty(base, modesty, weather.band);
 
-  const searchQuery =
-    gender === "nonbinary"
-      ? adjusted.searchQuery.replace(/^(men|women) /, "unisex ")
-      : adjusted.searchQuery;
+  let searchQuery = adjusted.searchQuery;
+  if (gender === "nonbinary") {
+    searchQuery = searchQuery.replace(/^(men|women) /, "unisex ");
+  } else if ((gender === "girl" || gender === "boy") && ageGroup) {
+    searchQuery = searchQuery.replace(/^(girls|boys) /, `${ageGroup} ${gender === "girl" ? "girl" : "boy"} `);
+  }
 
   const roundedTemp = Math.round(weather.feelsLikeC);
   return {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { Gender, Modesty, Preferences, StyleChoice } from "../types";
+import { AgeGroup, Gender, Modesty, Preferences, StyleChoice } from "../types";
 import { DEFAULT_PREFS } from "../storage";
 import { colors, fonts, radius, shadow } from "../theme";
 import Springy from "../components/Springy";
@@ -17,7 +17,17 @@ const GENDERS: { value: Gender; label: string }[] = [
   { value: "female", label: "Women" },
   { value: "male", label: "Men" },
   { value: "nonbinary", label: "Non-binary" },
+  { value: "girl", label: "Girl" },
+  { value: "boy", label: "Boy" },
 ];
+
+const AGE_GROUPS: { value: AgeGroup; label: string; hint: string }[] = [
+  { value: "toddler", label: "Toddler", hint: "Ages 2–5" },
+  { value: "kids", label: "Kids", hint: "Ages 6–12" },
+  { value: "teen", label: "Teen", hint: "Ages 13–17" },
+];
+
+const KIDS_GENDERS: Gender[] = ["girl", "boy"];
 
 const STYLES: { value: StyleChoice; label: string }[] = [
   { value: "casual", label: "Casual" },
@@ -85,7 +95,15 @@ export default function OnboardingScreen({ initial, onDone }: Props) {
             <Springy
               key={g.value}
               style={chip(prefs.gender === g.value)}
-              onPress={() => setPrefs({ ...prefs, gender: g.value })}
+              onPress={() =>
+                setPrefs({
+                  ...prefs,
+                  gender: g.value,
+                  ageGroup: KIDS_GENDERS.includes(g.value)
+                    ? prefs.ageGroup ?? "kids"
+                    : undefined,
+                })
+              }
             >
               <Text style={chipText(prefs.gender === g.value)}>{g.label}</Text>
             </Springy>
@@ -93,7 +111,33 @@ export default function OnboardingScreen({ initial, onDone }: Props) {
         </View>
       </Animated.View>
 
-      <Animated.View entering={enter(2)}>
+      {KIDS_GENDERS.includes(prefs.gender) && (
+        <Animated.View entering={enter(2)}>
+          <Text style={styles.section}>Age group</Text>
+          {AGE_GROUPS.map((ag) => (
+            <Springy
+              key={ag.value}
+              style={[
+                styles.modestyCard,
+                prefs.ageGroup === ag.value && styles.chipSelected,
+              ]}
+              onPress={() => setPrefs({ ...prefs, ageGroup: ag.value })}
+            >
+              <Text style={chipText(prefs.ageGroup === ag.value)}>{ag.label}</Text>
+              <Text
+                style={[
+                  styles.hint,
+                  prefs.ageGroup === ag.value && styles.chipTextSelected,
+                ]}
+              >
+                {ag.hint}
+              </Text>
+            </Springy>
+          ))}
+        </Animated.View>
+      )}
+
+      <Animated.View entering={enter(3)}>
         <Text style={styles.section}>My style</Text>
         <View style={styles.row}>
           {STYLES.map((s) => (
@@ -108,7 +152,7 @@ export default function OnboardingScreen({ initial, onDone }: Props) {
         </View>
       </Animated.View>
 
-      <Animated.View entering={enter(3)}>
+      <Animated.View entering={enter(4)}>
         <Text style={styles.section}>Modesty preference</Text>
         {MODESTY.map((m) => (
           <Springy
@@ -132,7 +176,7 @@ export default function OnboardingScreen({ initial, onDone }: Props) {
         ))}
       </Animated.View>
 
-      <Animated.View entering={enter(4)}>
+      <Animated.View entering={enter(5)}>
         <Text style={styles.section}>Daily notification time</Text>
         <View style={styles.row}>
           {TIMES.map((t) => {
@@ -160,7 +204,7 @@ export default function OnboardingScreen({ initial, onDone }: Props) {
         </View>
       </Animated.View>
 
-      <Animated.View entering={enter(5)}>
+      <Animated.View entering={enter(6)}>
         <Springy style={styles.cta} onPress={() => onDone(prefs)}>
           <Text style={styles.ctaText}>
             {initial ? "Save changes" : "Get my daily outfit"}

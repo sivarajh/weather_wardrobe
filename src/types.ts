@@ -1,4 +1,6 @@
-export type Gender = "female" | "male" | "nonbinary";
+export type Gender = "female" | "male" | "nonbinary" | "girl" | "boy";
+
+export type AgeGroup = "toddler" | "kids" | "teen";
 
 export type StyleChoice =
   | "casual"
@@ -12,6 +14,7 @@ export type Modesty = "relaxed" | "moderate" | "high";
 
 export interface Preferences {
   gender: Gender;
+  ageGroup?: AgeGroup;
   style: StyleChoice;
   modesty: Modesty;
   notificationHour: number;

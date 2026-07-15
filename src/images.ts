@@ -161,7 +161,9 @@ async function fetchOpenverse(query: string, need: number): Promise<string[]> {
     const results: OpenverseResult[] = data.results ?? [];
     return results
       .map((r, idx) => ({
-        url: r.thumbnail ?? r.url ?? "",
+        // Use the direct image URL — thumbnail is an Openverse API redirect
+        // that wsrv.nl cannot proxy. Fall back to thumbnail only if url absent.
+        url: r.url ?? r.thumbnail ?? "",
         score: subjectScore(r.title ?? "", query),
         idx,
       }))

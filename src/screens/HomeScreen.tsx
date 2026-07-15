@@ -47,7 +47,8 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
         snapshot,
         prefs.gender,
         prefs.style,
-        prefs.modesty
+        prefs.modesty,
+        prefs.ageGroup
       );
       setPlaceLabel(place.label);
       setWeather(snapshot);

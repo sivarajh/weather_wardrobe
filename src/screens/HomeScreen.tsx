@@ -168,7 +168,7 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
             ))}
           </ScrollView>
           <Text style={styles.imageCaption}>
-            Sample looks matched to your style (via Unsplash)
+            Sample looks matched to your style
           </Text>
         </Animated.View>
       )}

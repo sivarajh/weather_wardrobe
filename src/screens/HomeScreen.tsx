@@ -37,6 +37,7 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
   const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
   const [outfit, setOutfit] = useState<OutfitRecommendation | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imagesLoading, setImagesLoading] = useState(false);
 
   const refresh = useCallback(async () => {
     setError(null);
@@ -54,7 +55,10 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
       setWeather(snapshot);
       setOutfit(recommendation);
       setImageUrls([]);
-      fetchOutfitImages(recommendation.imageQuery).then(setImageUrls);
+      setImagesLoading(true);
+      fetchOutfitImages(recommendation.imageQuery)
+        .then(setImageUrls)
+        .finally(() => setImagesLoading(false));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
@@ -143,32 +147,37 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
         <Text style={styles.summary}>{outfit.summary}</Text>
       </Animated.View>
 
-      {imageUrls.length > 0 && (
+      {(imagesLoading || imageUrls.length > 0) && (
         <Animated.View entering={FadeIn.duration(400)}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.imageRow}
           >
-            {imageUrls.map((url, i) => (
-              <Animated.View
-                key={url}
-                entering={FadeInRight.delay(120 * i)
-                  .duration(500)
-                  .springify()
-                  .damping(18)}
-              >
-                <Image
-                  source={{ uri: url }}
-                  style={styles.image}
-                  contentFit="cover"
-                  transition={300}
-                />
-              </Animated.View>
-            ))}
+            {imagesLoading && imageUrls.length === 0
+              ? // Skeleton placeholders while images load
+                [0, 1, 2, 3, 4].map((i) => (
+                  <View key={i} style={[styles.image, styles.imageSkeleton]} />
+                ))
+              : imageUrls.map((url, i) => (
+                  <Animated.View
+                    key={url}
+                    entering={FadeInRight.delay(120 * i)
+                      .duration(500)
+                      .springify()
+                      .damping(18)}
+                  >
+                    <Image
+                      source={{ uri: url }}
+                      style={styles.image}
+                      contentFit="cover"
+                      transition={300}
+                    />
+                  </Animated.View>
+                ))}
           </ScrollView>
           <Text style={styles.imageCaption}>
-            Sample looks matched to your style (via Unsplash)
+            Sample looks matched to your style
           </Text>
         </Animated.View>
       )}
@@ -303,6 +312,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     marginRight: 10,
     backgroundColor: colors.primaryFaint,
+  },
+  imageSkeleton: {
+    opacity: 0.4,
   },
   imageCaption: {
     fontSize: 11,

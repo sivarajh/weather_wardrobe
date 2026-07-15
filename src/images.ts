@@ -4,6 +4,10 @@
 //   3. Openverse           – Creative Commons, no API key
 // Images are proxied through wsrv.nl so they load reliably on iOS (avoids
 // CDN TLS issues and re-encodes to plain JPEG).
+//
+// The full imageQuery ("women summer cotton midi dress casual outfit") is too
+// long for tag-based APIs, so it's distilled to a short subject + style term
+// before being sent to Flickr and Openverse.
 
 interface FlickrItem {
   title?: string;
@@ -20,6 +24,32 @@ interface OpenverseResult {
   title?: string;
   thumbnail?: string;
   url?: string;
+}
+
+// Distil a long outfit query into a short subject + style pair that
+// works well with tag-based and keyword-limited APIs.
+function simplify(query: string): string {
+  const q = query.toLowerCase();
+
+  let subject = "fashion";
+  if (/\btoddler\b/.test(q)) subject = "toddler";
+  else if (/\bkids?\b/.test(q)) subject = "kids";
+  else if (/\bteen\b/.test(q)) subject = "teen";
+  else if (/\bgirls?\b/.test(q)) subject = "girls";
+  else if (/\bboys?\b/.test(q)) subject = "boys";
+  else if (/\bwomen\b/.test(q)) subject = "women";
+  else if (/\bmen\b/.test(q)) subject = "men";
+  else if (/\bunisex\b/.test(q)) subject = "unisex";
+
+  let style = "outfit";
+  if (/\bcasual\b/.test(q)) style = "casual outfit";
+  else if (/\bformal\b/.test(q)) style = "formal outfit";
+  else if (/\bactivewear\b/.test(q)) style = "activewear";
+  else if (/\bstreetswear\b/.test(q)) style = "streetwear";
+  else if (/\bboho\b/.test(q)) style = "boho outfit";
+  else if (/\bethnic\b/.test(q)) style = "ethnic wear";
+
+  return `${subject} ${style}`;
 }
 
 function proxyUrl(raw: string): string {
@@ -49,11 +79,13 @@ function subjectScore(text: string, query: string): number {
 
 async function fetchFlickr(query: string, need: number): Promise<string[]> {
   try {
-    // Flickr public feed accepts comma-separated tags.
-    const tags = query.trim().replace(/\s+/g, ",");
+    // Flickr tag searches are too restrictive with long queries — distil to
+    // subject + style, use tag_mode=any so any matching tag returns results.
+    const short = simplify(query);
+    const tags = short.trim().replace(/\s+/g, ",");
     const url =
       `https://api.flickr.com/services/feeds/photos_public.gne` +
-      `?tags=${encodeURIComponent(tags)}&format=json&nojsoncallback=1&lang=en-us`;
+      `?tags=${encodeURIComponent(tags)}&tag_mode=any&format=json&nojsoncallback=1&lang=en-us`;
     const res = await fetch(url, {
       headers: { Accept: "application/json" },
     });
@@ -116,7 +148,7 @@ async function fetchUnsplash(query: string, need: number): Promise<string[]> {
 async function fetchOpenverse(query: string, need: number): Promise<string[]> {
   try {
     const params = new URLSearchParams({
-      q: query,
+      q: simplify(query),
       page_size: String(need * 3),
       license_type: "commercial,modification",
       source: "flickr,wikimedia",

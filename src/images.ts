@@ -13,6 +13,12 @@
 // long for tag-based APIs, so it's distilled to a short subject + style term.
 
 import { Platform } from "react-native";
+import { SERPAPI_KEY } from "./config";
+
+interface SerpShoppingResult {
+  title?: string;
+  thumbnail?: string;
+}
 
 // Wrap non-CORS endpoints in a public CORS proxy on web builds only.
 function corsSafe(url: string): string {
@@ -225,6 +231,37 @@ async function fetchOpenverse(query: string, need: number): Promise<string[]> {
   }
 }
 
+// Google Shopping product images via SerpAPI — the most style-relevant
+// source since results are actual retail listings for the recommended
+// pieces. Only active when SERPAPI_KEY is set in src/config.ts.
+async function fetchGoogleShopping(
+  query: string,
+  need: number
+): Promise<string[]> {
+  if (!SERPAPI_KEY) return [];
+  try {
+    const params = new URLSearchParams({
+      engine: "google_shopping",
+      q: query,
+      num: String(need * 2),
+      api_key: SERPAPI_KEY,
+    });
+    const res = await fetch(
+      corsSafe(`https://serpapi.com/search.json?${params}`),
+      { headers: { Accept: "application/json" } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    const results: SerpShoppingResult[] = data.shopping_results ?? [];
+    return results
+      .map((r) => r.thumbnail ?? "")
+      .filter(Boolean)
+      .slice(0, need);
+  } catch {
+    return [];
+  }
+}
+
 // LoremFlickr serves a random tag-matched Flickr photo directly as an image
 // response — no fetch, no JSON, no CORS. Distinct lock values give distinct
 // photos. Used to fill whatever the real search sources couldn't.
@@ -240,7 +277,8 @@ export async function fetchOutfitImages(
   query: string,
   count = 5
 ): Promise<string[]> {
-  const [unsplash, flickr, openverse] = await Promise.all([
+  const [shopping, unsplash, flickr, openverse] = await Promise.all([
+    withTimeout(fetchGoogleShopping(query, count)),
     withTimeout(fetchUnsplash(query, count)),
     withTimeout(fetchFlickr(query, count)),
     withTimeout(fetchOpenverse(query, count)),
@@ -248,7 +286,7 @@ export async function fetchOutfitImages(
 
   const seen = new Set<string>();
   const merged: string[] = [];
-  for (const url of [...unsplash, ...flickr, ...openverse]) {
+  for (const url of [...shopping, ...unsplash, ...flickr, ...openverse]) {
     if (!seen.has(url)) {
       seen.add(url);
       merged.push(url);

@@ -1,14 +1,31 @@
 // Fetches style-matched outfit photos. Sources, in priority order:
-//   1. Unsplash napi      – best quality; no CORS headers, so native-only
+//   1. Unsplash napi      – best quality and most style-relevant search
 //   2. Flickr public feed – no API key; its JSON is malformed (escaped
-//                           single quotes) and must be sanitized before parse;
-//                           no CORS headers, so native-only
-//   3. Openverse          – Creative Commons API; CORS-enabled, works on web
+//                           single quotes) and must be sanitized before parse
+//   3. Openverse          – Creative Commons API; CORS-enabled
 //   4. LoremFlickr        – guaranteed filler: plain <img>-able URLs, no
 //                           fetch/JSON/CORS involved, so the strip is never empty
 //
+// Unsplash and Flickr send no CORS headers, so on web builds their requests
+// are routed through the allorigins.win CORS proxy; on native they go direct.
+//
 // The full imageQuery ("women summer cotton midi dress casual outfit") is too
 // long for tag-based APIs, so it's distilled to a short subject + style term.
+
+import { Platform } from "react-native";
+import { SERPAPI_KEY } from "./config";
+
+interface SerpShoppingResult {
+  title?: string;
+  thumbnail?: string;
+}
+
+// Wrap non-CORS endpoints in a public CORS proxy on web builds only.
+function corsSafe(url: string): string {
+  return Platform.OS === "web"
+    ? `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+    : url;
+}
 
 interface FlickrItem {
   title?: string;
@@ -53,6 +70,36 @@ function simplify(query: string): { subject: string; style: string } {
   return { subject, style };
 }
 
+// Flickr's fashion community tags photos with these compound tags far more
+// consistently than with plain words like "men" or "casual" — using them
+// keeps random archive/travel photos out of tag-based results.
+function fashionTags(query: string): string[] {
+  const { subject, style } = simplify(query);
+  const subjectTag =
+    {
+      women: "womensfashion",
+      men: "mensfashion",
+      girl: "kidsfashion",
+      boy: "kidsfashion",
+      kids: "kidsfashion",
+      toddler: "kidsfashion",
+      teen: "kidsfashion",
+      unisex: "fashion",
+      fashion: "fashion",
+    }[subject] ?? "fashion";
+  const styleTag =
+    {
+      casual: "casualstyle",
+      formal: "formalwear",
+      sportswear: "activewear",
+      streetwear: "streetstyle",
+      boho: "bohostyle",
+      ethnic: "ethnicwear",
+      outfit: "ootd",
+    }[style] ?? "ootd";
+  return [subjectTag, styleTag, "outfit"];
+}
+
 // Boost results whose description/title matches the expected subject,
 // penalise those that mention the opposite.
 function subjectScore(text: string, query: string): number {
@@ -90,7 +137,7 @@ async function fetchUnsplash(query: string, need: number): Promise<string[]> {
       orientation: "portrait",
     });
     const res = await fetch(
-      `https://unsplash.com/napi/search/photos?${params}`,
+      corsSafe(`https://unsplash.com/napi/search/photos?${params}`),
       { headers: { Accept: "application/json" } }
     );
     if (!res.ok) return [];
@@ -118,12 +165,16 @@ async function fetchUnsplash(query: string, need: number): Promise<string[]> {
 
 async function fetchFlickr(query: string, need: number): Promise<string[]> {
   try {
-    const { subject, style } = simplify(query);
+    // tag_mode=any + fashion community tags: photos tagged with e.g.
+    // "womensfashion" or "streetstyle" are overwhelmingly outfit shots.
+    const tags = fashionTags(query).join(",");
     const url =
       `https://api.flickr.com/services/feeds/photos_public.gne` +
-      `?tags=${encodeURIComponent(`${subject},${style}`)}&tag_mode=all` +
+      `?tags=${encodeURIComponent(tags)}&tag_mode=any` +
       `&format=json&nojsoncallback=1&lang=en-us`;
-    const res = await fetch(url, { headers: { Accept: "application/json" } });
+    const res = await fetch(corsSafe(url), {
+      headers: { Accept: "application/json" },
+    });
     if (!res.ok) return [];
     // Flickr's feed JSON illegally escapes single quotes (\') — res.json()
     // throws on it, so sanitize the raw text before parsing.
@@ -168,10 +219,44 @@ async function fetchOpenverse(query: string, need: number): Promise<string[]> {
         score: subjectScore(r.title ?? "", query),
         idx,
       }))
-      .filter((r) => r.url && r.score > 0)
+      // Openverse is archive-heavy; only keep results whose title
+      // affirmatively matches the requested subject (score 2), otherwise
+      // maps and documents sneak into the strip.
+      .filter((r) => r.url && r.score >= 2)
       .sort((a, b) => b.score - a.score || a.idx - b.idx)
       .slice(0, need)
       .map((r) => r.url);
+  } catch {
+    return [];
+  }
+}
+
+// Google Shopping product images via SerpAPI — the most style-relevant
+// source since results are actual retail listings for the recommended
+// pieces. Only active when SERPAPI_KEY is set in src/config.ts.
+async function fetchGoogleShopping(
+  query: string,
+  need: number
+): Promise<string[]> {
+  if (!SERPAPI_KEY) return [];
+  try {
+    const params = new URLSearchParams({
+      engine: "google_shopping",
+      q: query,
+      num: String(need * 2),
+      api_key: SERPAPI_KEY,
+    });
+    const res = await fetch(
+      corsSafe(`https://serpapi.com/search.json?${params}`),
+      { headers: { Accept: "application/json" } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    const results: SerpShoppingResult[] = data.shopping_results ?? [];
+    return results
+      .map((r) => r.thumbnail ?? "")
+      .filter(Boolean)
+      .slice(0, need);
   } catch {
     return [];
   }
@@ -181,8 +266,7 @@ async function fetchOpenverse(query: string, need: number): Promise<string[]> {
 // response — no fetch, no JSON, no CORS. Distinct lock values give distinct
 // photos. Used to fill whatever the real search sources couldn't.
 function loremFlickrFill(query: string, need: number): string[] {
-  const { subject, style } = simplify(query);
-  const tags = encodeURIComponent(`${subject},${style}`);
+  const tags = encodeURIComponent(fashionTags(query).join(","));
   return Array.from(
     { length: need },
     (_, i) => `https://loremflickr.com/600/750/${tags}?lock=${i + 1}`
@@ -193,7 +277,8 @@ export async function fetchOutfitImages(
   query: string,
   count = 5
 ): Promise<string[]> {
-  const [unsplash, flickr, openverse] = await Promise.all([
+  const [shopping, unsplash, flickr, openverse] = await Promise.all([
+    withTimeout(fetchGoogleShopping(query, count)),
     withTimeout(fetchUnsplash(query, count)),
     withTimeout(fetchFlickr(query, count)),
     withTimeout(fetchOpenverse(query, count)),
@@ -201,7 +286,7 @@ export async function fetchOutfitImages(
 
   const seen = new Set<string>();
   const merged: string[] = [];
-  for (const url of [...unsplash, ...flickr, ...openverse]) {
+  for (const url of [...shopping, ...unsplash, ...flickr, ...openverse]) {
     if (!seen.has(url)) {
       seen.add(url);
       merged.push(url);

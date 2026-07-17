@@ -219,10 +219,9 @@ async function fetchOpenverse(query: string, need: number): Promise<string[]> {
         score: subjectScore(r.title ?? "", query),
         idx,
       }))
-      // Openverse is archive-heavy; only keep results whose title
-      // affirmatively matches the requested subject (score 2), otherwise
-      // maps and documents sneak into the strip.
-      .filter((r) => r.url && r.score >= 2)
+      // Openverse is archive-heavy; drop score-0 results (opposite gender/age)
+      // but allow score-1 (neutral) so the strip isn't over-filtered.
+      .filter((r) => r.url && r.score >= 1)
       .sort((a, b) => b.score - a.score || a.idx - b.idx)
       .slice(0, need)
       .map((r) => r.url);
@@ -238,7 +237,10 @@ async function fetchGoogleShopping(
   query: string,
   need: number
 ): Promise<string[]> {
-  if (!SERPAPI_KEY) return [];
+  if (!SERPAPI_KEY) {
+    console.warn("[images] SerpAPI key not set — skipping Google Shopping");
+    return [];
+  }
   try {
     const params = new URLSearchParams({
       engine: "google_shopping",
@@ -250,14 +252,20 @@ async function fetchGoogleShopping(
       corsSafe(`https://serpapi.com/search.json?${params}`),
       { headers: { Accept: "application/json" } }
     );
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.warn(`[images] SerpAPI responded ${res.status}`);
+      return [];
+    }
     const data = await res.json();
     const results: SerpShoppingResult[] = data.shopping_results ?? [];
-    return results
+    const urls = results
       .map((r) => r.thumbnail ?? "")
       .filter(Boolean)
       .slice(0, need);
-  } catch {
+    console.log(`[images] SerpAPI returned ${urls.length} images`);
+    return urls;
+  } catch (e) {
+    console.warn("[images] SerpAPI fetch failed:", e);
     return [];
   }
 }
@@ -304,14 +312,19 @@ export async function fetchOutfitImages(
     withTimeout(fetchOpenverse(query, remaining)),
   ]);
 
+  console.log(
+    `[images] sources: shopping=${shopping.length} unsplash=${unsplash.length}` +
+    ` flickr=${flickr.length} openverse=${openverse.length}`
+  );
+
   const merged = dedupe(
     [...shopping, ...unsplash, ...flickr, ...openverse],
     count
   );
 
-  // Guarantee a full strip even when every search source fails
-  // (e.g. CORS on web builds, network filtering, empty results).
+  // Guarantee a full strip even when every search source fails.
   if (merged.length < count) {
+    console.warn(`[images] Filling ${count - merged.length} slots with LoremFlickr`);
     merged.push(...loremFlickrFill(query, count - merged.length));
   }
   return merged;

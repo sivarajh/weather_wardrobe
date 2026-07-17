@@ -273,26 +273,41 @@ function loremFlickrFill(query: string, need: number): string[] {
   );
 }
 
+function dedupe(urls: string[], count: number): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const url of urls) {
+    if (!seen.has(url)) {
+      seen.add(url);
+      out.push(url);
+    }
+    if (out.length >= count) break;
+  }
+  return out;
+}
+
 export async function fetchOutfitImages(
   query: string,
   count = 5
 ): Promise<string[]> {
-  const [shopping, unsplash, flickr, openverse] = await Promise.all([
-    withTimeout(fetchGoogleShopping(query, count)),
-    withTimeout(fetchUnsplash(query, count)),
-    withTimeout(fetchFlickr(query, count)),
-    withTimeout(fetchOpenverse(query, count)),
+  // Google Shopping goes first and alone: it's the most relevant source
+  // (actual product listings for the recommended pieces), and running it
+  // ahead of the rest avoids burning SerpAPI's limited free quota on every
+  // refresh when it can already fill the strip by itself.
+  const shopping = dedupe(await withTimeout(fetchGoogleShopping(query, count)), count);
+  if (shopping.length >= count) return shopping;
+
+  const remaining = count - shopping.length;
+  const [unsplash, flickr, openverse] = await Promise.all([
+    withTimeout(fetchUnsplash(query, remaining)),
+    withTimeout(fetchFlickr(query, remaining)),
+    withTimeout(fetchOpenverse(query, remaining)),
   ]);
 
-  const seen = new Set<string>();
-  const merged: string[] = [];
-  for (const url of [...shopping, ...unsplash, ...flickr, ...openverse]) {
-    if (!seen.has(url)) {
-      seen.add(url);
-      merged.push(url);
-    }
-    if (merged.length >= count) break;
-  }
+  const merged = dedupe(
+    [...shopping, ...unsplash, ...flickr, ...openverse],
+    count
+  );
 
   // Guarantee a full strip even when every search source fails
   // (e.g. CORS on web builds, network filtering, empty results).

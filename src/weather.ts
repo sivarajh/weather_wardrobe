@@ -91,6 +91,48 @@ function getWebPosition(): Promise<{ latitude: number; longitude: number }> {
 // geolocation call, which gets annoying fast.
 const PLACE_CACHE_KEY = "weatherWardrobe.lastPlace";
 const PLACE_CACHE_TTL_MS = 30 * 60 * 1000;
+const MANUAL_LOCATION_KEY = "weatherWardrobe.manualLocation";
+
+// Resolve a city name to coordinates using Open-Meteo's geocoding API
+// (free, no key, CORS-enabled).
+export async function geocodeCity(city: string): Promise<LocatedPlace> {
+  const params = new URLSearchParams({
+    name: city,
+    count: "1",
+    language: "en",
+    format: "json",
+  });
+  const res = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?${params}`
+  );
+  if (!res.ok) throw new Error("Geocoding service error.");
+  const data = await res.json();
+  const result = data.results?.[0];
+  if (!result) throw new Error(`"${city}" not found. Try a different city name.`);
+  const label = [result.name, result.admin1, result.country]
+    .filter(Boolean)
+    .join(", ");
+  return { latitude: result.latitude, longitude: result.longitude, label };
+}
+
+export async function saveManualLocation(place: LocatedPlace): Promise<void> {
+  await AsyncStorage.setItem(MANUAL_LOCATION_KEY, JSON.stringify(place));
+}
+
+export async function clearManualLocation(): Promise<void> {
+  await AsyncStorage.removeItem(MANUAL_LOCATION_KEY);
+  await AsyncStorage.removeItem(PLACE_CACHE_KEY);
+}
+
+async function loadManualLocation(): Promise<LocatedPlace | null> {
+  try {
+    const raw = await AsyncStorage.getItem(MANUAL_LOCATION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
 
 async function loadCachedPlace(): Promise<LocatedPlace | null> {
   try {
@@ -120,6 +162,10 @@ async function saveCachedPlace(place: LocatedPlace): Promise<void> {
 }
 
 export async function getCurrentPlace(): Promise<LocatedPlace> {
+  // Manual override takes priority over auto-detection.
+  const manual = await loadManualLocation();
+  if (manual) return manual;
+
   const cached = await loadCachedPlace();
   if (cached) return cached;
 

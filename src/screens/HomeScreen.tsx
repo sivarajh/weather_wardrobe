@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -6,13 +6,20 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeIn, FadeInDown, FadeInRight } from "react-native-reanimated";
 import { OutfitRecommendation, Preferences, WeatherSnapshot } from "../types";
-import { fetchWeather, getCurrentPlace } from "../weather";
+import {
+  clearManualLocation,
+  fetchWeather,
+  geocodeCity,
+  getCurrentPlace,
+  saveManualLocation,
+} from "../weather";
 import { recommendOutfit } from "../outfits";
 import { fetchOutfitImages } from "../images";
 import { colors, fonts, gradient, radius, shadow } from "../theme";
@@ -38,6 +45,12 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
   const [outfit, setOutfit] = useState<OutfitRecommendation | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [imagesLoading, setImagesLoading] = useState(false);
+  const [isManualLocation, setIsManualLocation] = useState(false);
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState("");
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationSaving, setLocationSaving] = useState(false);
+  const locationInputRef = useRef<TextInput>(null);
 
   const refresh = useCallback(async () => {
     setError(null);
@@ -67,6 +80,42 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
   }, [prefs]);
 
   useEffect(() => {
+    setLoading(true);
+    refresh();
+  }, [refresh]);
+
+  // Detect whether a manual location is currently active.
+  useEffect(() => {
+    import("@react-native-async-storage/async-storage").then(({ default: AS }) =>
+      AS.getItem("weatherWardrobe.manualLocation").then((raw) =>
+        setIsManualLocation(!!raw)
+      )
+    );
+  }, [placeLabel]);
+
+  const submitLocation = useCallback(async () => {
+    const city = locationInput.trim();
+    if (!city) return;
+    setLocationSaving(true);
+    setLocationError(null);
+    try {
+      const place = await geocodeCity(city);
+      await saveManualLocation(place);
+      setIsManualLocation(true);
+      setEditingLocation(false);
+      setLocationInput("");
+      setLoading(true);
+      refresh();
+    } catch (e) {
+      setLocationError(e instanceof Error ? e.message : "Location not found.");
+    } finally {
+      setLocationSaving(false);
+    }
+  }, [locationInput, refresh]);
+
+  const revertToAutoLocation = useCallback(async () => {
+    await clearManualLocation();
+    setIsManualLocation(false);
     setLoading(true);
     refresh();
   }, [refresh]);
@@ -110,9 +159,58 @@ export default function HomeScreen({ prefs, onEditPrefs }: Props) {
       }
     >
       <Animated.View entering={enter(0)} style={styles.headerRow}>
-        <View>
-          <Text style={styles.place}>{placeLabel}</Text>
-          <Text style={styles.condition}>{weather.condition}</Text>
+        <View style={styles.locationBlock}>
+          {editingLocation ? (
+            <>
+              <View style={styles.locationInputRow}>
+                <TextInput
+                  ref={locationInputRef}
+                  style={styles.locationInput}
+                  value={locationInput}
+                  onChangeText={setLocationInput}
+                  placeholder="Enter city name…"
+                  placeholderTextColor={colors.gray}
+                  onSubmitEditing={submitLocation}
+                  returnKeyType="go"
+                  autoFocus
+                  editable={!locationSaving}
+                />
+                <Springy
+                  style={[styles.locationActionBtn, locationSaving && styles.btnDisabled]}
+                  onPress={submitLocation}
+                >
+                  <Text style={styles.locationActionText}>
+                    {locationSaving ? "…" : "Go"}
+                  </Text>
+                </Springy>
+                <Springy
+                  style={styles.locationCancelBtn}
+                  onPress={() => {
+                    setEditingLocation(false);
+                    setLocationInput("");
+                    setLocationError(null);
+                  }}
+                >
+                  <Text style={styles.locationCancelText}>✕</Text>
+                </Springy>
+              </View>
+              {locationError && (
+                <Text style={styles.locationError}>{locationError}</Text>
+              )}
+            </>
+          ) : (
+            <>
+              <Springy onPress={() => setEditingLocation(true)}>
+                <Text style={styles.place}>{placeLabel}</Text>
+              </Springy>
+              <Text style={styles.condition}>{weather.condition}</Text>
+              {isManualLocation && (
+                <Springy onPress={revertToAutoLocation}>
+                  <Text style={styles.revertLink}>Use my location</Text>
+                </Springy>
+              )}
+            </>
+          )}
         </View>
         <Springy onPress={onEditPrefs} style={styles.settingsBtn}>
           <Text style={styles.settingsText}>⚙ Style</Text>
@@ -258,6 +356,54 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     color: colors.gray,
     marginTop: 2,
+  },
+  locationBlock: { flex: 1, marginRight: 12 },
+  locationInputRow: { flexDirection: "row", alignItems: "center" },
+  locationInput: {
+    flex: 1,
+    fontSize: 18,
+    fontFamily: fonts.body,
+    color: colors.ink,
+    borderBottomWidth: 1.5,
+    borderBottomColor: colors.primary,
+    paddingVertical: 4,
+    paddingHorizontal: 0,
+  },
+  locationActionBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    marginLeft: 8,
+  },
+  locationActionText: {
+    color: colors.paper,
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 13,
+  },
+  btnDisabled: { opacity: 0.5 },
+  locationCancelBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 7,
+    marginLeft: 4,
+  },
+  locationCancelText: {
+    color: colors.gray,
+    fontSize: 16,
+    fontFamily: fonts.body,
+  },
+  locationError: {
+    color: "#e05c5c",
+    fontSize: 12,
+    fontFamily: fonts.body,
+    marginTop: 4,
+  },
+  revertLink: {
+    color: colors.primary,
+    fontSize: 12,
+    fontFamily: fonts.bodySemiBold,
+    marginTop: 4,
+    textDecorationLine: "underline",
   },
   settingsBtn: {
     backgroundColor: colors.primaryFaint,
